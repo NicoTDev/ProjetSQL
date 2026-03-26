@@ -1,12 +1,13 @@
-<script>
-export default {
-name: "ItemViewPage"
-}
+<template>
+  <div>
+
+  </div>
+</template>
+
+<script setup>
+
 </script>
 
-<template>
-  $END$
-</template>
 
 <style scoped>
 

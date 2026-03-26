@@ -1,12 +1,12 @@
-<script>
-export default {
-  name: "Carte"
-}
-</script>
-
 <template>
+  <div>
 
+  </div>
 </template>
+
+<script setup>
+
+</script>
 
 <style scoped>
 

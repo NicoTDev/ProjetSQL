@@ -1,12 +1,12 @@
-<script>
-export default {
-name: "InventoryPage"
-}
-</script>
-
 <template>
-  $END$
+  <div>
+
+  </div>
 </template>
+
+<script setup>
+
+</script>
 
 <style scoped>
 
