@@ -3,7 +3,9 @@ import {reactive} from "vue"
 export const userStore = reactive({
 
     id: 1,
-    username:"The Spiker",
+    username:"NicoTOpenTheBox",
     profileImage:null,
+    hasEmailVerified: true,
+    email: "Nicotrem2004@hotmail.com"
 
 })

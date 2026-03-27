@@ -4,12 +4,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { Flip } from 'gsap/Flip'
+import { SplitText} from "gsap/SplitText";
 
 import App from './App.vue';
 import router from './router';
 
 import './assets/style.css';
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, ScrambleTextPlugin, Flip);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, ScrambleTextPlugin, Flip, SplitText);
 
 const app = createApp(App);
 

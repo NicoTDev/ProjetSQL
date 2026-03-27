@@ -6,9 +6,10 @@
 :root {
     --couleur-background: #000000;
     --couleur-font: #f6f6f6;
-    --couleur-accent: #c54900;
+    --couleur-accent: #e08500;
     --couleur-navbar-background: #2e2e2e;
     --nav-bar-height: 60px;
+    --couleur-input-box: #2e2e2e;
 }
 /* configuration d'application */
 #app {
@@ -64,6 +65,18 @@ a:hover {
 /* Listes */
 ul {
     list-style: none;
+}
+
+.default-input {
+
+    font-family: 'Manrope', sans-serif;
+    border: none;
+    background-color: var(--couleur-input-box);
+    color: white;
+
+    border-radius: 10px;
+    padding: 0 10px 0 10px;
+
 }
 
 

@@ -3,8 +3,9 @@ import BoxPage from "../pages/boxPage/BoxPage.vue";
 import CartPage from "../pages/cart/CartPage.vue";
 import InventoryPage from "../pages/inventory/InventoryPage.vue";
 import AuthPage from "../pages/auth/AuthPage.vue";
-import ProfilePage from "../pages/profile/ProfilePage.vue";
 import ItemViewPage from "../pages/itemViewPage/ItemViewPage.vue";
+import AccountPage from "../pages/account/AccountPage.vue";
+import ProfilePage from "../pages/Profile/ProfilePage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,11 @@ const router = createRouter({
             path: '/profile',
             name: 'Profile Page',
             component: ProfilePage,
+        },
+        {
+            path: '/account',
+            name: 'Account Page',
+            component: AccountPage,
         },
         {
             path: '/item/:slug',

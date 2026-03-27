@@ -23,13 +23,13 @@
 
     <router-link to="/cart" >
 
-      <img :src="cart" class="cart-image" >
+      <img class="cart-image" >
 
     </router-link>
 
 
 
-    <router-link to="/profile" class="profile-view-container focusable">
+    <router-link to="/account" class="profile-view-container focusable">
 
       <img
         :src="userStore.profileImage || '/icons/noPic.png'"
@@ -56,6 +56,7 @@ import {userStore} from "../stores/userStore";
 
 
 .nav-bar {
+
 
   justify-content: space-between;
   align-items: center;
