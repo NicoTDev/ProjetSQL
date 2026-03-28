@@ -1,141 +1,186 @@
 <template>
   <div class="page">
 
-    <div ref="threeBg" class="three-bg"></div>
+    <Box :state="state"></Box>
 
-    <div class="content-container items-center">
-      <h1 class="legendary-text">Maybe the next box is the good one</h1>
+    <div class="content-container">
+      <h1 class="title">{{ titleText }}</h1>
+      <div v-if="state !== 1" :class="['button-container', isActive ? 'active' : 'disabled']"
+      >
+        <button @click="openBox" :disabled="state === 2" class="button-open">
+          Open the box
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue"
-import * as THREE from "three"
+import {ref, onMounted, onUnmounted, render, computed} from "vue"
 import gsap from "gsap"
-import {SplitText} from "gsap/SplitText";
+import { SplitText } from "gsap/SplitText"
+import Box from "./components/3dEngine.vue";
+
+// Valeur initiale selon la date de la boite
+const state = ref(1);// 0=closed 1=isRevealing 2=open (Au yeux de la bd, isRevealing n'existe pas. Lors de l'ouverture, il passe directement à open avec generated content
+const isActive = computed(() => state.value !== 2)
+const titleText = ref("Error");
+let split;
 
 
 
-const threeBg = ref(null)
+const reveal = () => {}
+const finishOpening = () => {}
+const reset = () => {}
+const showOpen = () => {
 
-let scene = null
-let camera = null
-let renderer = null
-let animationId = null
-let cube = null
+  titleText.value = "Your next box is in XX:XX:XX";
 
-onMounted(() => {
+}
+const showClose = () => {
 
-  //faire l'animation
-  const split = SplitText.create(".legendary-text", { type: "chars" })
+  titleText.value = "Maybe the next box is the good one";
 
-  const chars = split.chars;
+}
 
 
-  // 🌈 GRADIENT QUI BOUGE
-  gsap.to(chars, {
-    backgroundPosition: "200% 50%",
-    duration: 3,
-    ease: "linear",
-    repeat: -1,
-    stagger: 0.03
+const openBox = () => {
+
+  gsap.to(".button-container", {
+    opacity: 0,
+    duration: 2,
+    ease: "back.inOut",
   })
 
-  // ✨ GLOW QUI RESPIRE
-  gsap.to(chars, {
+  gsap.to(".title", {
+
+    opacity: 0,
+    duration: 3,
+    ease: "back.inOut",
+  })
+  state.value = 2
+}
+
+const closeBox = () => {
+  open.value = !open.value
+}
+
+onMounted(() => {
+  split = SplitText.create(".title", { type: "chars" })
+
+  gsap.to(split.chars, {
     keyframes: [
-      { color: "#ff4fd8" },
-      { color: "#7a5cff" },
       { color: "#32cfff" },
+      { color: "#7a5cff" },
+      { color: "#ff4fd8" },
       { color: "#7dffcf" },
       { color: "#ffd84d" },
-      { color: "#ff4fd8" } // ⚠️ même que début
+      { color: "#32cfff" },
     ],
     duration: 5,
     stagger: 0.1,
     repeat: -1,
-    repeatDelay: 0,
     ease: "none",
   })
 
 
-  const container = threeBg.value
-  if (!container) return
-
-  scene = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  )
-  camera.position.z = 5
-
-  renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
+  gsap.to(".title", {
+    opacity: 1,
+    duration: 2,
   })
 
-  renderer.setSize(window.innerWidth, window.innerHeight)
-  container.appendChild(renderer.domElement)
 
-  const geometry = new THREE.BoxGeometry()
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    wireframe: true
-  })
+  state.value ? showOpen() : showClose();
 
-  cube = new THREE.Mesh(geometry, material)
-  scene.add(cube)
-
-  const animate = () => {
-    animationId = requestAnimationFrame(animate)
-
-    cube.rotation.x += 0.005
-    cube.rotation.y += 0.008
-
-    renderer.render(scene, camera)
-  }
-
-  animate()
-
-  window.addEventListener("resize", handleResize)
 })
 
-const handleResize = () => {
-  if (!camera || !renderer) return
-
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-
-  renderer.setSize(window.innerWidth, window.innerHeight)
-}
+onUnmounted(() => {split?.revert()})
 </script>
 
 <style scoped>
 .page {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-  background: #111;
-}
-
-.three-bg {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: #0d0d14;
+}
+
+.content-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  padding-top: 100px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+
   pointer-events: none;
 }
 
-.legendary-text {
-  margin-top: 100px;
-  color: #ff4fd8;
+.title {
+  opacity: 0;
+  margin: 0;
+  color: #32cfff;
+  font-size: 50px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
 }
 
-.items-center {
-  align-items: center;
-  justify-content: center;
-  display: flex;
+
+.button-open {
+  font-size: 1.4em;
+  padding: 0.6em 0.8em;
+  border-radius: 0.5em;
+  border: none;
+  background-color: #000;
+  color: #fff;
+  box-shadow: 2px 2px 3px #000000b4;
+  z-index: 100;
+  pointer-events: auto;
+  cursor: inherit;
+
 }
+
+.button-container {
+  position: relative;
+  padding: 3px;
+  background: linear-gradient(90deg, #03a9f4, #f441a5);
+  border-radius: 0.9em;
+  transition: all 0.4s ease;
+  z-index: 10;
+}
+
+.button-container.active {
+  cursor: pointer;
+}
+
+.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 0.9em;
+  z-index: -10;
+  filter: blur(0);
+  transition: filter 0.4s ease;
+}
+
+.active:hover::before {
+  background: linear-gradient(90deg, #03a9f4, #f441a5);
+  filter: blur(1.2em);
+}
+.active:active::before {
+  filter: blur(0.2em);
+}
+
 </style>

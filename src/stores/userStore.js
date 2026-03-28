@@ -6,6 +6,7 @@ export const userStore = reactive({
     username:"NicoTOpenTheBox",
     profileImage:null,
     hasEmailVerified: true,
-    email: "Nicotrem2004@hotmail.com"
+    email: "Nicotrem2004@hotmail.com",
+
 
 })

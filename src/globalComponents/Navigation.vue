@@ -56,16 +56,16 @@ import {userStore} from "../stores/userStore";
 
 
 .nav-bar {
-
-
+  position: relative;
+  z-index: 10;
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  display: flex;
-  padding: 10px;
-  margin: 0;
   height: var(--nav-bar-height);
+  padding: 0 10px;
+  margin: 0;
+  box-sizing: border-box;
   background-color: var(--couleur-navbar-background);
-  max-height: 100%;
 }
 
 .focusable {
@@ -120,13 +120,12 @@ import {userStore} from "../stores/userStore";
 }
 
 .cart-image:hover  {
-  height: calc(var(--nav-bar-height) - 32px);
-  width: calc(var(--nav-bar-height) - 32px);
   content: url('/icons/cart-orange.png');
-
 }
 
 
-
+h1, h2 {
+  margin: 0;
+}
 
 </style>
