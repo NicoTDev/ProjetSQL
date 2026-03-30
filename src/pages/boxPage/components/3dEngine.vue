@@ -4,20 +4,22 @@
 
 <script setup>
 import * as THREE from "three"
-import { OrbitControls } from "three/addons/controls/OrbitControls.js"
-import { onMounted, onUnmounted, ref, watch } from "vue"
+import {OrbitControls} from "three/addons/controls/OrbitControls.js"
+import {nextTick, onMounted, onUnmounted, ref, watch} from "vue"
 import gsap from "gsap"
-import { BoxModel } from "./BoxModel"
-import { CardModel } from "./CardModel"
-
-const props = defineProps({
-  state: Number,
-})
+import {BoxModel} from "./BoxModel"
+import {CardModel} from "./CardModel"
+import * as ItemStore from "../../../stores/ItemStore"
+import { useRouter } from "vue-router"
+const state = defineModel("state")
 
 const bg = ref(null)
 const box = new BoxModel()
 
-const cards = [];
+const router = useRouter()
+
+let cards = []
+let canvases = []
 let boxScene = null
 let uiScene = null
 let boxCamera = null
@@ -26,6 +28,9 @@ let renderer = null
 let controls = null
 let raf = null
 
+// Raycasting
+let raycaster = null
+let mouse = null
 
 const resize = () => {
   if (!boxCamera || !uiCamera || !renderer) return
@@ -33,11 +38,9 @@ const resize = () => {
   const width = window.innerWidth
   const height = window.innerHeight
 
-  // caméra 3D monde
   boxCamera.aspect = width / height
   boxCamera.updateProjectionMatrix()
 
-  // caméra UI orthographique
   uiCamera.left = width / -2
   uiCamera.right = width / 2
   uiCamera.top = height / 2
@@ -49,42 +52,10 @@ const resize = () => {
 }
 
 const showOpen = () => {
-  // La boite apparait ouverte, les cartes apparaissent l'une après l'autre et il y a un compteur au lieu des boutons
-  box.setOpen();
+  box.setOpen()
+  summonCards()
 
-  // On get les 5 cartes et on les fait spawn
-  // Cartes UI
-
-  const cardsAPI = [
-    {title:"CASQUETTE CIELE 2020 ADVENTURE EDITION",
-     rarety:"EPIC",
-     price:"30.20$",
-      imageURL:"public/icons/casquette.png"
-    },
-    {title:"Une autre casquette de test",
-      rarety:"RARE",
-      price:"1.20$",
-      imageURL:"public/icons/casquette.png"
-    },
-    {title:"Une salobrinbanteQuiNousDitOui",
-      rarety:"UNIQUE",
-      price:"99.99$",
-      imageURL:"public/icons/casquette.png"
-    },
-    {title:"Test 1",
-      rarety:"UNCOMMON",
-      price:"10.99$",
-      imageURL:"public/icons/casquette.png"
-    },
-    {title:"item",
-      rarety:"LEGENDARY",
-      price:"30.20$",
-      imageURL:"public/icons/casquette.png"
-    }
-  ]
-
-  let posX = -500;
-  box.getChest().scale.set(0,0,0)
+  box.getChest().scale.set(0, 0, 0)
   gsap.to(box.getChest().scale, {
     x: 1,
     y: 1,
@@ -92,25 +63,75 @@ const showOpen = () => {
     duration: 2,
     ease: "back.out(1.7)"
   })
-  for (let card of cardsAPI) {
 
-    const canvas = document.createElement("canvas")
-    const card1 = new CardModel(canvas, card.title, card.rarety, card.imageURL, card.price).getModel()
-    card1.position.set(posX, 140, 0)
-    posX += 250;
-    card1.scale.set(0, 0, 0)
-    cards.push(card1)
-    uiScene.add(card1)
-    gsap.to(card1.scale, {
+  for (let i = 0; i < cards.length; i++) {
+    cards[i].position.set(-500 + i * 250, 140, 0)
+
+    gsap.to(cards[i].scale, {
       x: 1,
       y: 1,
       z: 1,
       duration: 2,
       ease: "back.out(1.7)"
     })
+  }
+}
 
+const summonCards = () => {
+  for (let i = 0; i < ItemStore.cardsAPI.length; i++) {
+    const cardAPI = ItemStore.cardsAPI[i]
+    const canvas = document.createElement("canvas")
+
+    const card = new CardModel(
+      canvas,
+      cardAPI.title,
+      cardAPI.rarety,
+      cardAPI.imageURL,
+      cardAPI.price
+    ).getModel()
+
+    card.userData = {
+      type: "card",
+      index: i,
+      title: cardAPI.title,
+      data: cardAPI
+    }
+
+    card.position.set(0, -150, 0)
+    card.scale.set(0, 0, 0)
+
+    cards.push(card)
+    canvases.push(canvas)
+    uiScene.add(card)
+  }
+}
+
+const destroyCards = async () => {
+  for (let card of cards) {
+    const randomDelay = Math.random()
+
+    gsap.to(card.scale, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration: 2,
+      ease: "none",
+      delay: randomDelay
+    })
+
+    gsap.to(card.position, {
+      x: 0,
+      y: -150,
+      duration: 2,
+      ease: "none",
+      delay: randomDelay
+    })
   }
 
+  await nextTick()
+
+  cards = []
+  canvases = []
 }
 
 const showClosed = () => {
@@ -118,7 +139,9 @@ const showClosed = () => {
 }
 
 const reset = () => {
-  box.close()
+  destroyCards()
+  setTimeout(() => box.close(), 3000)
+
   console.log("reset")
 }
 
@@ -131,7 +154,7 @@ const reveal = () => {
     y: 2,
     z: 3.5,
     duration: 2,
-    ease: "power2.inOut",
+    ease: "power2.inOut"
   })
 
   gsap.to(controls.target, {
@@ -139,34 +162,81 @@ const reveal = () => {
     y: 0.5,
     z: 0,
     duration: 2,
-    ease: "power2.inOut",
-    onUpdate: () => controls.update(),
+    ease: "power2.inOut"
   })
+
+  summonCards()
+
+  for (let i = 0; i < cards.length; i++) {
+    gsap.to(cards[i].scale, {
+      x: 1,
+      y: 1,
+      z: 1,
+      duration: 2,
+      delay: 2 + 2 * i
+    })
+
+    gsap.to(cards[i].position, {
+      x: -500 + i * 250,
+      y: 140,
+      duration: 2,
+      delay: 2 + 2 * i
+    })
+  }
 }
 
 const finishOpening = () => {
   console.log("finishOpening")
 }
 
+const onCanvasClick = (event) => {
+  if (!renderer || !uiCamera || cards.length === 0 || state.value !== 1) return
+
+  const rect = renderer.domElement.getBoundingClientRect()
+
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+  raycaster.setFromCamera(mouse, uiCamera)
+
+  const intersects = raycaster.intersectObjects(cards, true)
+
+  if (intersects.length === 0) return
+
+  let root = intersects[0].object
+  while (root.parent && !cards.includes(root)) {
+    root = root.parent
+  }
+
+  if (!root || !cards.includes(root)) return
+
+
+  gsap.to(root.scale, {
+    x: 1.3,
+    y: 1.3,
+    z: 1.3,
+    duration: 0.2,
+    onComplete: () => {
+      router.push(`/item/${root.userData?.title}`)
+    }
+  });
+}
+
 onMounted(() => {
   const width = window.innerWidth
   const height = window.innerHeight
 
-  // Scene monde
   boxScene = new THREE.Scene()
   boxScene.background = new THREE.Color(0x0d0d14)
 
-  // Scene UI
   uiScene = new THREE.Scene()
 
   const uiAmbient = new THREE.AmbientLight(0xffffff, 1.5)
   uiScene.add(uiAmbient)
 
-  // Caméra monde
   boxCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100)
   boxCamera.position.set(2.7, 2.1, 2.8)
 
-  // Caméra UI
   uiCamera = new THREE.OrthographicCamera(
     width / -2,
     width / 2,
@@ -178,10 +248,9 @@ onMounted(() => {
   uiCamera.position.set(0, 0, 10)
   uiCamera.lookAt(0, 0, 0)
 
-  // Renderer
   renderer = new THREE.WebGLRenderer({
     antialias: true,
-    alpha: false,
+    alpha: false
   })
   renderer.setSize(width, height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -193,7 +262,10 @@ onMounted(() => {
 
   bg.value.appendChild(renderer.domElement)
 
-  // Controls
+  // Raycaster init
+  raycaster = new THREE.Raycaster()
+  mouse = new THREE.Vector2()
+
   controls = new OrbitControls(boxCamera, renderer.domElement)
   controls.enableDamping = true
   controls.enablePan = false
@@ -203,7 +275,6 @@ onMounted(() => {
   controls.maxPolarAngle = 1.45
   controls.update()
 
-  // Lumières
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.35)
   boxScene.add(ambientLight)
 
@@ -224,33 +295,29 @@ onMounted(() => {
   boxScene.add(mainDirLight)
   boxScene.add(mainDirLight.target)
 
-  // Modèle coffre
   boxScene.add(box.getChest())
 
-  // État initial
-  props.state ? showOpen() : showClosed()
+  state.value ? showOpen() : showClosed()
 
-  // Resize
   window.addEventListener("resize", resize)
+  renderer.domElement.addEventListener("click", onCanvasClick)
 
-  // Loop
   const loop = () => {
     raf = requestAnimationFrame(loop)
 
     const t = performance.now() * 0.001
     box.getChest().rotation.y = Math.sin(t * 0.55) * 0.08
 
+    if (state.value === 1) {
+      cards.forEach((card, index) => {
+        const floatSpeed = 1.2 + index * 0.25
+        const floatAmplitude = 12 + index * 4
+        const baseY = index === 0 ? 140 : 100
+        const offset = index * 1.4
 
-    cards.forEach((card, index) => {
-
-      const floatSpeed = 1.2 + index * 0.25
-      const floatAmplitude = 12 + index * 4
-      const baseY = index === 0 ? 140 : 100
-      const offset = index * 1.4
-
-      card.position.y = baseY + Math.sin(t * floatSpeed + offset) * floatAmplitude
-    })
-
+        card.position.y = baseY + Math.sin(t * floatSpeed + offset) * floatAmplitude
+      })
+    }
 
     controls.update()
 
@@ -266,6 +333,10 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("resize", resize)
 
+  if (renderer?.domElement) {
+    renderer.domElement.removeEventListener("click", onCanvasClick)
+  }
+
   if (raf) cancelAnimationFrame(raf)
 
   if (controls) controls.dispose()
@@ -279,7 +350,7 @@ onUnmounted(() => {
 })
 
 watch(
-  () => props.state,
+  () => state.value,
   (newValue) => {
     console.log("Watching", newValue)
 

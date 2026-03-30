@@ -1,13 +1,17 @@
 <template>
   <div class="page">
 
-    <Box :state="state"></Box>
+    <Box v-model:state="state"></Box>
 
     <div class="content-container">
-      <h1 class="title">{{ titleText }}</h1>
-      <div v-if="state !== 1" :class="['button-container', isActive ? 'active' : 'disabled']"
+      <h1 v-if="state !== 1" ref="title" class="title">Your next box is ready</h1>
+      <div class="time-div" v-else>
+        <h1 ref="title" class="title">The next box is in : </h1>
+        <h1 class="time-title">{{counterText}}</h1>
+      </div>
+      <div v-if="buttonVisible" :class="['button-container', isActive ? 'active' : 'disabled']"
       >
-        <button @click="openBox" :disabled="state === 2" class="button-open">
+        <button @click="reveal" :disabled="state === 2" class="button-open">
           Open the box
         </button>
       </div>
@@ -16,57 +20,167 @@
 </template>
 
 <script setup>
-import {ref, onMounted, onUnmounted, render, computed} from "vue"
+import {ref, onMounted, onUnmounted, computed, nextTick} from "vue"
 import gsap from "gsap"
 import { SplitText } from "gsap/SplitText"
 import Box from "./components/3dEngine.vue";
+import {userStore} from "../../stores/userStore";
 
 // Valeur initiale selon la date de la boite
-const state = ref(1);// 0=closed 1=isRevealing 2=open (Au yeux de la bd, isRevealing n'existe pas. Lors de l'ouverture, il passe directement à open avec generated content
-const isActive = computed(() => state.value !== 2)
-const titleText = ref("Error");
+const state = ref(0);// 0=closed 1=isRevealing 2=open (Au yeux de la bd, isRevealing n'existe pas. Lors de l'ouverture, il passe directement à open avec generated content
+const isActive = computed(() => state.value === 0)
+const buttonVisible = ref(false);
+const counterText = ref("");
+const title = ref(null);
 let split;
 
 
+const finishOpening = async () => {
 
-const reveal = () => {}
-const finishOpening = () => {}
-const reset = () => {}
+  state.value = 1;
+
+  await nextTick();
+
+  startCounter();
+
+  spawnBoxTimeTitle();
+
+  await createLegendaryText();
+
+
+}
+const reset = async () => {
+
+  state.value = 0;
+
+  await nextTick();
+
+  gsap.to(".time-title", {
+    opacity: 0,
+    duration: 2,
+  })
+
+
+  gsap.to(title.value,{
+    opacity: 1,
+    duration: 2,
+    delay:2,
+  })
+
+  await createLegendaryText();
+
+
+
+  setTimeout(async () => {
+    buttonVisible.value = true
+
+    await nextTick();
+
+    gsap.to(".button-container",{
+      opacity: 1,
+      duration: 2,
+      ease: "back.inOut",
+      onComplete: () => {
+      }
+    })
+  }, 2000)
+
+
+}
+let intervalId = null
+
+const startCounter = () => {
+
+
+  const updateCountdown = () => {
+    const remaining = userStore.nextBoxDate.getTime() - Date.now()
+
+    if (remaining <= 0) {
+      counterText.value = "END"
+      clearInterval(intervalId)
+      intervalId = null
+      reset();
+      return
+    }
+
+    counterText.value = `${formatTime(remaining)}`
+  }
+
+  updateCountdown()
+  if (intervalId) clearInterval(intervalId)
+  intervalId = setInterval(updateCountdown, 1000)
+
+}
+
+
+function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+}
+
 const showOpen = () => {
 
-  titleText.value = "Your next box is in XX:XX:XX";
+  startCounter();
+  spawnBoxTimeTitle();
+  createLegendaryText();
+
 
 }
 const showClose = () => {
 
-  titleText.value = "Maybe the next box is the good one";
-
+  gsap.to(title.value, {
+    opacity: 1,
+    duration: 2,
+  })
+  gsap.to(".button-container", {
+    opacity: 1,
+    duration: 2,
+  })
+  createLegendaryText();
 }
 
 
-const openBox = () => {
+const reveal = () => {
 
+  state.value = 2
+  userStore.nextBoxDate = new Date(Date.now() + 20 * 1000)
   gsap.to(".button-container", {
     opacity: 0,
     duration: 2,
     ease: "back.inOut",
+    onComplete: () => {
+      buttonVisible.value = false;
+    }
   })
 
-  gsap.to(".title", {
+  gsap.to(title.value, {
 
     opacity: 0,
     duration: 3,
     ease: "back.inOut",
   })
-  state.value = 2
+
+  setTimeout(() => {
+    finishOpening()
+  },12000)
+
 }
 
 const closeBox = () => {
   open.value = !open.value
 }
 
-onMounted(() => {
-  split = SplitText.create(".title", { type: "chars" })
+const createLegendaryText = async () => {
+
+  split?.revert()
+
+  await nextTick()
+
+  split = SplitText.create(title.value, { type: "chars" })
 
   gsap.to(split.chars, {
     keyframes: [
@@ -83,14 +197,33 @@ onMounted(() => {
     ease: "none",
   })
 
+}
 
-  gsap.to(".title", {
+const spawnBoxTimeTitle = () => {
+
+  gsap.to(title.value, {
     opacity: 1,
     duration: 2,
   })
 
+  createLegendaryText();
+
+  gsap.to(".time-title", {
+    opacity: 1,
+    duration: 2,
+  })
+
+}
+
+onMounted(async () => {
+
+  buttonVisible.value = state.value === 0;
+
+  await nextTick()
 
   state.value ? showOpen() : showClose();
+
+
 
 })
 
@@ -136,6 +269,24 @@ onUnmounted(() => {split?.revert()})
   user-select: none;
 }
 
+.time-title {
+  opacity: 0;
+  margin: 0;
+  color: #ff0000;
+  font-size: 50px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.time-div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 
 .button-open {
   font-size: 1.4em;
@@ -152,6 +303,7 @@ onUnmounted(() => {split?.revert()})
 }
 
 .button-container {
+  opacity: 0;
   position: relative;
   padding: 3px;
   background: linear-gradient(90deg, #03a9f4, #f441a5);

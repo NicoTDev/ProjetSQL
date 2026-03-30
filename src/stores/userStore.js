@@ -7,6 +7,7 @@ export const userStore = reactive({
     profileImage:null,
     hasEmailVerified: true,
     email: "Nicotrem2004@hotmail.com",
+    nextBoxDate: new Date(Date.now() + 20 * 1000)
 
 
 })
