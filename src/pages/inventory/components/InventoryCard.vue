@@ -76,7 +76,6 @@ onMounted(() => {
   transition:ease-in-out 0.2s;
 
 
-
 }
 
 .item-image {
