@@ -170,19 +170,15 @@ const reveal = () => {
 
 }
 
-const closeBox = () => {
-  open.value = !open.value
-}
-
 const createLegendaryText = async () => {
 
   split?.revert()
 
   await nextTick()
 
-  split = SplitText.create(title.value, { type: "chars" })
+  split = SplitText.create(title.value, { type: "words" })
 
-  gsap.to(split.chars, {
+  gsap.to(split.words, {
     keyframes: [
       { color: "#32cfff" },
       { color: "#7a5cff" },

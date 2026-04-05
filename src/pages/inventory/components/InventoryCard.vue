@@ -1,54 +1,47 @@
 
 <template>
+  <router-link
+    class="card-container"
+    :class="props.state + '-card'"
+    :to="props.state !== 'unknown' ? `/item/${props.item.slug}` : '/inventory'"
+    @mouseenter="hoverIn"
+    @mouseleave="hoverOut"
+  >
+    <img
+      class="item-image"
+      :class="(props.state === 'unknown' ? 'blur' : props.item.rarety.toLowerCase()) + '-image'"
+      src="https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg"
+    />
 
-  <router-link class="card-container" :class="props.state+'-card'" :to="props.state!=='unknown'?`/item/${props.item.slug}`: '/inventory'">
-
-
-    <img class="item-image" :class="(props.state === 'unknown'? 'blur': props.item.rarety.toLowerCase()) +'-image'"
-         src="https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg">
-
-    <p class="title"> {{ props.item.title }} </p>
-
-
-
+    <p class="title">{{ props.item.title }}</p>
   </router-link>
-
 </template>
 
 <script setup>
-
-import {onMounted} from "vue";
-import gsap from "gsap"
-
+import gsap from "gsap";
 
 const props = defineProps({
-  item: {
-    type: Object
-  },
-  state: {
-    type: String, //unknown, discovered, brought
-  },
+  item: Object,
+  state: String,
+});
 
-})
+const hoverIn = (event) => {
+  gsap.to(event.currentTarget, {
+    scale: 1.1,
+    y: -2,
+    duration: 0.2,
+    ease: "power2.out",
+  });
+};
 
-onMounted(() => {
-
-  console.log(props.state)
-
-  if (props.state === "brought") {
-    //Gold effect
-    gsap.to(".brought-card", {
-      backgroundPosition: "200% 50%",
-      duration: 10,
-      ease: "none",
-      repeat: -1,
-      yoyo: true
-    })
-  }
-
-})
-
-
+const hoverOut = (event) => {
+  gsap.to(event.currentTarget, {
+    scale: 1,
+    y: 0,
+    duration: 0.2,
+    ease: "power2.out",
+  });
+};
 </script>
 
 <style scoped>
@@ -69,14 +62,7 @@ onMounted(() => {
 
 
 }
-.card-container:hover {
 
-  transform: scale(1.1) translateY(-2px);
-  cursor: pointer;
-  transition:ease-in-out 0.2s;
-
-
-}
 
 .item-image {
 

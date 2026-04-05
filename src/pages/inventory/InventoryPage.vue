@@ -1,13 +1,13 @@
 <template>
   <div class="content-container center-items" >
 
-    <h1 class="title">Your inventory</h1>
+    <h1 class="page-title">Your inventory</h1>
 
     <h2 class="subtitle"> {{ 'You have discovered ' +  discoveredItem.length + " item" + (discoveredItem.length > 1 ? 's' : '') + " on " + items.length }}</h2>
 
     <div class="grid">
 
-      <InventoryCard :state="getState(item)" :item="item" v-for="item in items" key="{item.id}"/>
+      <InventoryCard class="card" :state="getState(item)" :item="item" v-for="item in items" key="{item.id}"/>
 
 
     </div>
@@ -22,6 +22,8 @@
 //get
 
 import InventoryCard from "./components/InventoryCard.vue";
+import gsap from "gsap";
+import {onMounted} from "vue";
 
 
 let broughtItems = [
@@ -190,6 +192,20 @@ let items = [
 ]
 
 
+onMounted(() => {
+
+  gsap.to(".card", {
+
+    opacity: 1,
+    scale: 1,
+    duration:2,
+    stagger:0.1,
+
+  })
+
+
+})
+
 
 
 const getState = (item) => {
@@ -215,12 +231,6 @@ const getState = (item) => {
 </script>
 
 <style scoped>
-
-.title {
-
-  margin: 20px;
-  font-size: 50px;
-}
 
 .subtitle {
 
@@ -250,4 +260,6 @@ const getState = (item) => {
 .content-container {
   padding: 20px 0px 800px 0px;
 }
+
+.card { opacity: 0; scale:0;}
 </style>

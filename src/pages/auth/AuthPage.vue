@@ -1,6 +1,6 @@
 <template>
   <div class="content-container center-items">
-    <h1 class="title-h1 text-center "> Auth </h1>
+    <h1 class="title-h1 text-center page-title "> Auth </h1>
     <login-form class="summonable-forms" v-if="!isCreatingNewAccount">
     </login-form>
     <register-form class="summonable-forms" v-if="isCreatingNewAccount">
@@ -128,8 +128,6 @@ onMounted(() => {
 .title-h1 {
 
   color: var(--couleur-accent);
-  padding-top: 20px;
-  padding-bottom: 20px;
   justify-content: center;
 
 }
