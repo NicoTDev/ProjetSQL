@@ -55,3 +55,5 @@ export const putJson = async (url, body = {}) => {
 
     return res.json();
 };
+
+export const BASIC_URL = "https://localhost:8000"

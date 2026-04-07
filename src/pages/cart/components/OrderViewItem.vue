@@ -2,14 +2,14 @@
 
   <div class="card-container">
 
-    <img class="card-image" :src="props.item.image" alt="item Logo"/>
+    <img class="card-image" :src="props.item.imageUrl" alt="item Logo"/>
 
-    <p class="card-title"> {{props.item.title}}</p>
+    <p class="card-title"> {{props.item.name}}</p>
 
 
     <div class="card-prix-remove-container">
 
-      <p class="card-prix">{{props.item.prix}}$</p>
+      <p class="card-prix">{{props.item.unitPrice}}$</p>
 
       <button class="card-remove">Remove</button>
 
