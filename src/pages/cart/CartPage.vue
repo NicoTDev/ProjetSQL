@@ -103,6 +103,19 @@ onMounted(async () => {
       ease:"back.inOut",
     })
 
+
+  const tl = gsap.timeline({ paused: true })
+    .to(buttonOrder.value, {
+      letterSpacing:"0.05rem",
+      scale:1.1,
+      duration: 0.2,
+      ease:"back.inOut" });
+
+  buttonOrder.value.addEventListener("mouseenter", () => tl.play());
+  buttonOrder.value.addEventListener("mouseleave", () => tl.reverse());
+
+
+
 })
 
 </script>

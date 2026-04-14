@@ -1,25 +1,33 @@
 <template>
-  <div :style="`background: ${getStyle(item.rarity).background}`" class="main-background">
+  <h1 v-if="loading">Loading...</h1>
+  <div v-else :style="`background: ${getStyle(item.rarity).background}`" class="main-background">
+
 
     <div class="content-container page-flex-alignment">
 
 
-      <h1 ref='title' :style="`color:${getStyle(item.rarity).color}`" class="page-title"> {{ item.title }} </h1>
+      <h1 ref='title' :style="`color:${getStyle(item.rarity).color}`" class="page-title"> {{ item.name }} </h1>
 
       <img ref='image' :style="`box-shadow: 0 0 0 4px ${getStyle(item.rarity).color},
       0 0 15px ${getStyle(item.rarity).color}, 0 0 30px ${getStyle(item.rarity).color};`"
-           class="image" :src="item.image"/>
+           class="image" :src="item.imageUrl"/>
 
 
       <p class="description"> {{item.description}}</p>
 
 
-      <div class="cart-div">
+      <div v-if="item.isAvailable" class="cart-div">
 
 
         <button ref="button" class="default-buy-button"> Add to cart </button>
 
-        <p class="price" ref="price"> {{item.price}}$</p>
+        <p :style="`color:${getStyle(item.rarity).color}`" class="price" ref="price"> {{item.unitPrice}}$</p>
+
+      </div>
+      <div v-else-if="item.isAvailable" class="cart-div">
+
+
+        <p :style="`color:${getStyle(item.rarity).color}`" class="price" ref="price"> {{item.unitPrice}}$</p>
 
       </div>
 
@@ -34,15 +42,18 @@
 //Avant on vérifie si l'item est dans la base de données de l'utilisateur
 import {useRoute} from "vue-router";
 import gsap from "gsap";
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref} from "vue";
+import {getItemBySlug} from "../../services/itemService";
 
 const route = useRoute();
 const price = ref(null);
 const title = ref(null);
 const image = ref(null);
 const button = ref(null);
+const loading = ref(true);
 //const item = route.params.slug;
 //fake item
+/*
 const item = {
 
   title: "Ceci est un vrai item",
@@ -57,6 +68,8 @@ const item = {
 
 }
 
+*/
+const item = ref(null);
 
 const getStyle = (rarity) => {
   switch (rarity) {
@@ -69,11 +82,23 @@ const getStyle = (rarity) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+
+  try {
+
+    item.value = await getItemBySlug(route.params.slug);
+
+
+  } finally {
+
+    loading.value = false;
+
+  }
+  await nextTick();
 
   gsap.to(title.value, {
 
-    color: getStyle(item.rarity).brightColor,
+    color: getStyle(item.value.rarity).brightColor,
     repeat:-1,
     yoyo:true,
     duration:1,
@@ -83,9 +108,9 @@ onMounted(() => {
 
   gsap.to(image.value, {
 
-    boxShadow:`0 0 0 4px ${getStyle(item.rarity).brightColor},
-               0 0 15px ${getStyle(item.rarity).brightColor},
-               0 0 30px ${getStyle(item.rarity).brightColor}`,
+    boxShadow:`0 0 0 4px ${getStyle(item.value.rarity).brightColor},
+               0 0 15px ${getStyle(item.value.rarity).brightColor},
+               0 0 30px ${getStyle(item.value.rarity).brightColor}`,
     repeat:-1,
     yoyo:true,
     duration:1,
@@ -95,7 +120,7 @@ onMounted(() => {
 
   gsap.to(price.value, {
 
-    color: getStyle(item.rarity).brightColor,
+    color: getStyle(item.value.rarity).brightColor,
     repeat:-1,
     yoyo:true,
     duration:1,
@@ -115,7 +140,6 @@ onMounted(() => {
   button.value.addEventListener("mouseleave", () => tl.reverse());
 
 
-
 })
 
 
@@ -127,58 +151,56 @@ onMounted(() => {
 
 
 .main-background {
-
-  position: absolute;
+  min-height: 100vh;
   width: 100%;
   background: #151515;
-  padding-bottom: 200px;
-
+  padding: 2rem 1rem 5rem;
+  box-sizing: border-box;
 }
 
 .page-flex-alignment {
-
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
-
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .page-title {
-
-
   padding-top: 20px;
-
+  text-align: center;
+  font-size: clamp(2rem, 5vw, 4rem);
 }
 
 .image {
-
-  width: 80%;
+  width: min(100%, 700px);
   height: auto;
   border-radius: 15px;
   box-shadow: 0 0 0 4px #0d9b00, 0 0 15px #0d9b00, 0 0 30px #0d9b00;
-
-
+  display: block;
 }
 
 .description {
-  padding: 20px;
-  font-size: 25px;
+  padding: 1.5rem 0;
+  font-size: clamp(1rem, 2.2vw, 1.5rem);
+  line-height: 1.6;
+  text-align: center;
+  max-width: 800px;
 }
 
 .cart-div {
-
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 20px;
-
+  flex-wrap: wrap;
 }
 
 .price {
-
-  font-size: 30px;
-
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  text-align: center;
 }
 </style>

@@ -5,11 +5,10 @@
 <script setup>
 import * as THREE from "three"
 import {OrbitControls} from "three/addons/controls/OrbitControls.js"
-import {nextTick, onMounted, onUnmounted, ref, watch} from "vue"
+import {nextTick, onMounted, onUnmounted, ref, watch, defineProps} from "vue"
 import gsap from "gsap"
 import {BoxModel} from "./BoxModel"
 import {CardModel} from "./CardModel"
-import * as ItemStore from "../../../stores/ItemStore"
 import { useRouter } from "vue-router"
 const state = defineModel("state")
 
@@ -78,31 +77,32 @@ const showOpen = () => {
 }
 
 const summonCards = () => {
-  for (let i = 0; i < ItemStore.cardsAPI.length; i++) {
-    const cardAPI = ItemStore.cardsAPI[i]
-    const canvas = document.createElement("canvas")
 
-    const card = new CardModel(
+
+  for (let card of props.box.items.sort((a, b) => a.slotIndex - b.slotIndex)) {
+
+    const canvas = document.createElement("canvas")
+    const localCard = new CardModel(
       canvas,
-      cardAPI.title,
-      cardAPI.rarety,
-      cardAPI.imageURL,
-      cardAPI.price
+      card.name,
+      card.rarity,
+      card.imageUrl,
+      card.unitPrice
     ).getModel()
 
-    card.userData = {
+    localCard.userData = {
       type: "card",
-      index: i,
-      title: cardAPI.title,
-      data: cardAPI
+      index: card.slotIndex,
+      title: card.slug,
+      data: card
     }
 
-    card.position.set(0, -150, 0)
-    card.scale.set(0, 0, 0)
+    localCard.position.set(0, -150, 0)
+    localCard.scale.set(0, 0, 0)
 
-    cards.push(card)
+    cards.push(localCard)
     canvases.push(canvas)
-    uiScene.add(card)
+    uiScene.add(localCard)
   }
 }
 
@@ -222,7 +222,13 @@ const onCanvasClick = (event) => {
   });
 }
 
+const props = defineProps({
+  box: {
+    type: Object
+  },
+})
 onMounted(() => {
+
   const width = window.innerWidth
   const height = window.innerHeight
 
@@ -297,6 +303,8 @@ onMounted(() => {
 
   boxScene.add(box.getChest())
 
+  console.log(state.value)
+
   state.value ? showOpen() : showClosed()
 
   window.addEventListener("resize", resize)
@@ -325,6 +333,8 @@ onMounted(() => {
     renderer.render(boxScene, boxCamera)
     renderer.clearDepth()
     renderer.render(uiScene, uiCamera)
+
+
   }
 
   loop()

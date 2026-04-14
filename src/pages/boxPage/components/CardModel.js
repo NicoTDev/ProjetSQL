@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import {RaretyColor} from "./RaretyColor";
+import {RarityColor} from "./RarityColor";
 
 export class CardModel {
-    constructor(canvas, title, rarety, imageSrc="public/icons/casquette.png", price = "00.99$") {
+    constructor(canvas, title, rarity, imageUrl, price = "00.99$") {
         this.model = null;
-        this.rarety = rarety;
+        this.rarity = rarity;
 
         canvas.width = 256;
         canvas.height = 512;
@@ -17,19 +17,20 @@ export class CardModel {
         const texture = new THREE.CanvasTexture(canvas);
 
         const image = new Image();
-        image.src = imageSrc;
+        image.crossOrigin = "anonymous"
+        image.src = imageUrl;
 
         image.onload = () => {
-            this.drawFront(ctx, canvas, title, price, rarety, image);
+            this.drawFront(ctx, canvas, title, price, rarity, image);
             texture.needsUpdate = true;
         };
         image.onerror = () => {
-            this.drawFront(ctx, canvas, title, price, rarety, null);
+            this.drawFront(ctx, canvas, title, price, rarity, null);
             texture.needsUpdate = true;
         };
 
         // au cas où l'image n'est pas encore chargée, on affiche déjà le fond + texte
-        this.drawFront(ctx, canvas, title, price, rarety, null);
+        this.drawFront(ctx, canvas, title, price, rarity, null);
         texture.needsUpdate = true;
 
         const frontMaterial = new THREE.MeshBasicMaterial({
@@ -37,7 +38,7 @@ export class CardModel {
             transparent: true
         });
 
-        const sideColor = new THREE.Color(RaretyColor[rarety].getBackground(ctx,canvas)).multiplyScalar(0.7);
+        const sideColor = new THREE.Color(RarityColor[rarity.toUpperCase()].getBackground(ctx,canvas)).multiplyScalar(0.7);
         const sideMaterial = new THREE.MeshBasicMaterial({ color: sideColor });
         const backMaterial = new THREE.MeshBasicMaterial({ color: sideColor });
 
@@ -60,7 +61,7 @@ export class CardModel {
         this.model.add(this.neonBorder);
     }
 
-    drawFront(ctx, canvas, title, price, rarety, image) {
+    drawFront(ctx, canvas, title, price, rarity, image) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // fond arrondi
@@ -69,14 +70,15 @@ export class CardModel {
         ctx.roundRect(0, 0, canvas.width, canvas.height, 20);
         ctx.clip();
 
-        ctx.fillStyle = RaretyColor[rarety].getBackground(ctx, canvas);
+        console.log(rarity.toUpperCase())
+        ctx.fillStyle = RarityColor[rarity.toUpperCase()].getBackground(ctx, canvas);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.restore();
 
         // zone intérieure blanche légère pour faire ressortir le contenu
 
         // titre
-        ctx.fillStyle = RaretyColor[rarety].getBadgeFont(ctx, canvas);
+        ctx.fillStyle = RarityColor[rarity.toUpperCase()].getBadgeFont(ctx, canvas);
         ctx.font = "bold 30px Arial";
         ctx.textAlign = "left";
 
@@ -97,10 +99,10 @@ export class CardModel {
         }
 
         // prix
-        ctx.fillStyle = RaretyColor[rarety].getBadgeFont(ctx, canvas);
+        ctx.fillStyle = RarityColor[rarity.toUpperCase()].getBadgeFont(ctx, canvas);
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(price, canvas.width / 2, 330);
+        ctx.fillText(`${price}$`, canvas.width / 2, 350);
 
 
         const badgeWidth = 220;
@@ -109,7 +111,7 @@ export class CardModel {
         const badgeY = canvas.height - 80;
 
 
-        ctx.fillStyle = RaretyColor[rarety].getBadgeBackground(ctx, canvas);
+        ctx.fillStyle = RarityColor[rarity.toUpperCase()].getBadgeBackground(ctx, canvas);
         ctx.beginPath();
         ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 12);
         ctx.fill();
@@ -122,11 +124,11 @@ export class CardModel {
         ctx.stroke();
 
 
-        ctx.fillStyle = RaretyColor[rarety].getBadgeFont(ctx, canvas);
+        ctx.fillStyle = RarityColor[rarity.toUpperCase()].getBadgeFont(ctx, canvas);
         ctx.font = "bold 32px Manrope";
         ctx.textAlign = "center";
         ctx.fillText(
-            this.rarety,
+            this.rarity,
             canvas.width / 2,
             badgeY + 44
         );
@@ -161,7 +163,8 @@ export class CardModel {
         canvas.height = 512;
 
         const ctx = canvas.getContext("2d");
-        ctx.fillStyle = RaretyColor[this.rarety].getGlow(ctx, canvas);
+        ctx.fillStyle = RarityColor[this.rarity.toUpperCase()
+            ].getGlow(ctx, canvas);
         ctx.fillRect(0, 0, 512, 512);
 
         const material = new THREE.MeshBasicMaterial({

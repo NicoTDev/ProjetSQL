@@ -1,13 +1,23 @@
 
 <template>
   <div class="inputbox">
-    <input type="text" required="required">
+    <input v-model="value" :type="props.type" required="required">
     <span>{{ label }}</span>
     <i></i>
   </div>
 </template>
 
 <script setup>
+
+import {ref} from "vue";
+
+const value = ref("");
+
+defineExpose({
+
+  getValue: () => value.value
+
+})
 const props = defineProps({
   modelValue: String,
   label: String,
@@ -16,8 +26,6 @@ const props = defineProps({
     default: "text"
   }
 });
-
-const emit = defineEmits(["update:modelValue"]);
 </script>
 
 <style scoped>

@@ -2,8 +2,11 @@ export const getJson = async (url) => {
     const res = await fetch(url);
     if(!res.ok) {
         const text = await res.text();
-        console.log(text);
-        throw new Error(`HTTP error: ${res.status} - ${text}`);
+
+        const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.status = res.status;
+
+        throw error
     }
     return res.json();
 };
@@ -17,10 +20,13 @@ export const postJson = async (url, body = {}) => {
         body: JSON.stringify(body)
     })
 
+
     if (!res.ok) {
         const text = await res.text()
-        console.log(text)
-        throw new Error(`HTTP error: ${res.status} - ${text}`)
+
+        const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.status = res.status;
+        throw error
     }
 
     return res.json()
@@ -33,8 +39,10 @@ export const deleteJson = async (url = {}) => {
 
     if (!res.ok) {
         const text = await res.text()
-        console.log(text)
-        throw new Error(`HTTP error: ${res.status} - ${text}`)
+        const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.status = res.status;
+
+        throw error
     }
 }
 
@@ -49,11 +57,13 @@ export const putJson = async (url, body = {}) => {
 
     if (!res.ok) {
         const text = await res.text();
-        console.log(text);
-        throw new Error(`HTTP error: ${res.status} - ${text}`);
+        const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.status = res.status;
+
+        throw error
     }
 
     return res.json();
 };
 
-export const BASIC_URL = "https://localhost:8000"
+export const BASIC_URL = "http://127.0.0.1:5000"

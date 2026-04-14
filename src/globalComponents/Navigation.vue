@@ -61,28 +61,24 @@ import {userStore} from "../stores/userStore";
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: var(--nav-bar-height);
-  padding: 0 10px;
+  min-height: var(--nav-bar-height);
+  padding: 0 16px;
   margin: 0;
   box-sizing: border-box;
   background-color: var(--couleur-navbar-background);
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .focusable {
-
   letter-spacing: 0;
   transition: ease-in-out 0.3s;
   cursor: pointer;
-
 }
 
 .focusable:hover {
-
   letter-spacing: 0.1rem;
-  transition: ease-in-out 0.3s;
-  cursor: pointer;
   text-shadow: 2px 2px 8px #ff1500;
-
 }
 
 .profile-view-container {
@@ -91,38 +87,55 @@ import {userStore} from "../stores/userStore";
   justify-content: center;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .account-container {
-
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-
+  gap: 16px;
+  min-width: 0;
 }
 
 .profile-image {
-
   height: calc(var(--nav-bar-height) - 20px);
   width: calc(var(--nav-bar-height) - 20px);
   border-radius: 50%;
-
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
-.cart-image  {
+.cart-image {
   height: calc(var(--nav-bar-height) - 32px);
   width: calc(var(--nav-bar-height) - 32px);
   content: url('/icons/cart-white.png');
   transition: ease-in-out 0.3s;
-
+  flex-shrink: 0;
 }
 
-.cart-image:hover  {
+.cart-image:hover {
   content: url('/icons/cart-orange.png');
 }
 
+.logo {
+  text-align: center;
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  white-space: nowrap;
+}
+
+.profile-view-container h2,
+.nav-bar h2 {
+  font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+}
+
+.profile-view-container h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
 
 h1, h2 {
   margin: 0;

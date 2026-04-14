@@ -1,4 +1,4 @@
-export const RaretyColor = {
+export const RarityColor = {
     COMMON: {
 
         getBackground: (ctx, canvas) => {

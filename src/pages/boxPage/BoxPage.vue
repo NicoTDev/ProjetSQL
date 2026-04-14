@@ -1,19 +1,26 @@
 <template>
   <div class="page">
 
-    <Box v-model:state="state"></Box>
+    <h1 LOADING v-if="loading" ></h1>
+    <Box v-else v-model:state="state" :box="box"></Box>
 
     <div class="content-container">
-      <h1 v-if="state !== 1" ref="title" class="title">Your next box is ready</h1>
+      <h1 v-if="state !== 1" ref="title" class="title">{{userStore.id !== null ? 'Your next box is ready' : 'You need to log in to open a box'}}</h1>
       <div class="time-div" v-else>
         <h1 ref="title" class="title">The next box is in : </h1>
         <h1 class="time-title">{{counterText}}</h1>
       </div>
       <div v-if="buttonVisible" :class="['button-container', isActive ? 'active' : 'disabled']"
       >
-        <button @click="reveal" :disabled="state === 2" class="button-open">
+
+        <button v-if="userStore.id !== null" @click="reveal" :disabled="state === 2" class="button-open">
           Open the box
         </button>
+        <router-link v-else to="/auth">
+          <button class="button-open">
+            Log in
+          </button>
+        </router-link>
       </div>
     </div>
   </div>
@@ -25,13 +32,16 @@ import gsap from "gsap"
 import { SplitText } from "gsap/SplitText"
 import Box from "./components/3dEngine.vue";
 import {userStore} from "../../stores/userStore";
+import {getLatestActiveBoxByUserId, openBox} from "../../services/boxService";
 
 // Valeur initiale selon la date de la boite
+const box = ref(null);
 const state = ref(0);// 0=closed 1=isRevealing 2=open (Au yeux de la bd, isRevealing n'existe pas. Lors de l'ouverture, il passe directement à open avec generated content
 const isActive = computed(() => state.value === 0)
 const buttonVisible = ref(false);
 const counterText = ref("");
 const title = ref(null);
+const loading = ref(true);
 let split;
 
 
@@ -146,8 +156,14 @@ const showClose = () => {
 
 const reveal = () => {
 
+
   state.value = 2
+
+  // Changer cet appel pour un appel API à open
   userStore.nextBoxDate = new Date(Date.now() + 20 * 1000)
+  openBox(userStore.id);
+
+
   gsap.to(".button-container", {
     opacity: 0,
     duration: 2,
@@ -212,6 +228,26 @@ const spawnBoxTimeTitle = () => {
 }
 
 onMounted(async () => {
+
+  try {
+    box.value = await getLatestActiveBoxByUserId(userStore.id);
+
+    await nextTick()
+
+    state.value = box.value.status === "active" ? 1 : 0;
+
+  }
+  catch (err) {
+    state.value = 0;
+  }
+
+  finally {
+    loading.value = false
+  }
+
+
+
+
 
   buttonVisible.value = state.value === 0;
 

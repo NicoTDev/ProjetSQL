@@ -2,12 +2,11 @@ import {reactive} from "vue"
 
 export const userStore = reactive({
 
-    id: 1111,
+    id: null,
     username:"NicoTOpenTheBox",
     profileImage:null,
-    hasEmailVerified: true,
     email: "Nicotrem2004@hotmail.com",
-    nextBoxDate: new Date(Date.now() + 20 * 1000)
+    expires: new Date(2011, 1, 1),
 
 
 })

@@ -61,8 +61,18 @@ export const addOrderItem = (orderId)  => {
 
 }
 
-export const deleteOrderItem = (orderId) => {}
+export const deleteOrderItem = (orderId) => {
+
+
+
+
+}
 
 
 // Spécial
-export const buyOrder = (orderId) => {}
+export const buyOrder = (orderId) => {
+
+
+
+
+}

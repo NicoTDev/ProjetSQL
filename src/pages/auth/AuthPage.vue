@@ -1,9 +1,9 @@
 <template>
   <div class="content-container center-items">
     <h1 class="title-h1 text-center page-title "> Auth </h1>
-    <login-form class="summonable-forms" v-if="!isCreatingNewAccount">
+    <login-form ref="loginRef" class="summonable-forms" v-if="!isCreatingNewAccount">
     </login-form>
-    <register-form class="summonable-forms" v-if="isCreatingNewAccount">
+    <register-form ref="registerRef" class="summonable-forms" v-if="isCreatingNewAccount">
     </register-form>
 
 
@@ -18,19 +18,66 @@
       {{ isCreatingNewAccount ? "Login" : "Register" }}
     </button>
 
+    <p class="error-log"> {{errorMessage}}</p>
+
   </div>
 </template>
 
 <script setup>
 
-import {onMounted, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import gsap from "gsap";
 import { nextTick } from "vue";
 import LoginForm from "./components/LoginForm.vue";
 import RegisterForm from "./components/RegisterForm.vue";
+import {login, registerUser} from "../../services/userService";
+import {userStore} from "../../stores/userStore";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
+const errorMessage = ref("")
+const modelLogin = ref({});
 const isCreatingNewAccount = ref(true);
-const submitForms = () => {
+const loginRef = ref(null);
+const registerRef = ref(null);
+const submitForms = async () => {
+
+  if (isCreatingNewAccount.value) {
+
+
+    const values = registerRef.value.getValues();
+
+    try {
+      const res = await registerUser(values.username, values.lastName, values.firstName, values.email, values.password);
+
+
+        userStore.id = res.data.userId;
+        await router.push("/")
+
+    } catch (error) {}
+
+  }
+  else {
+
+
+
+    const values = loginRef.value.getValues();
+    console.log(values);
+
+    try {
+      const res = await login(values.identifier, values.password);
+
+      console.log("status : " + res);
+
+        userStore.id = res.data.userId;
+        await router.push("/")
+
+    } catch(error) {
+
+      errorMessage.value = "Nom ou mot de passe invalide";
+    }
+
+  }
 
 
 
@@ -228,6 +275,12 @@ onMounted(() => {
 .inputbox input:valid ~i,
 .inputbox input:focus ~i {
   height: 44px;
+}
+
+.error-log {
+
+  margin-top: 10px;
+  color: hsl(0, 100%, 50%);
 }
 
 </style>
