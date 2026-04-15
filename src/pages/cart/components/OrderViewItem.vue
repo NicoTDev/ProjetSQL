@@ -9,7 +9,7 @@
 
     <div class="card-prix-remove-container">
 
-      <p class="card-prix">{{props.item.unitPrice}}$</p>
+      <p class="card-prix">{{props.item.lockedPrice}}$</p>
 
       <button class="card-remove">Remove</button>
 

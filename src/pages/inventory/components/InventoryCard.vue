@@ -9,16 +9,18 @@
   >
     <img
       class="item-image"
-      :class="(props.state === 'unknown' ? 'blur' : props.item.rarety.toLowerCase()) + '-image'"
-      src="https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg"
+      :class="(props.state === 'unknown' ? 'blur' : getRarityName(props.item.rarity).toLowerCase()) + '-image'"
+      :src="props.item.imageUrl"
     />
 
-    <p class="title">{{ props.item.title }}</p>
+    <p v-if="state === 'unknown'" class="title">???</p>
+    <p v-else class="title">{{ props.item.name }}</p>
   </router-link>
 </template>
 
 <script setup>
 import gsap from "gsap";
+import {getRarityName} from "../../../utils/RarityMapper";
 
 const props = defineProps({
   item: Object,

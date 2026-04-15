@@ -70,7 +70,6 @@ export class CardModel {
         ctx.roundRect(0, 0, canvas.width, canvas.height, 20);
         ctx.clip();
 
-        console.log(rarity.toUpperCase())
         ctx.fillStyle = RarityColor[rarity.toUpperCase()].getBackground(ctx, canvas);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.restore();

@@ -16,20 +16,15 @@
       <p class="description"> {{item.description}}</p>
 
 
-      <div v-if="item.isAvailable" class="cart-div">
+      <div v-if="item.lockedPrice" class="cart-div">
 
 
-        <button ref="button" class="default-buy-button"> Add to cart </button>
+        <button @click="addOrderItem(userStore.id, item.id)" ref="button" class="default-buy-button"> Add to cart </button>
 
-        <p :style="`color:${getStyle(item.rarity).color}`" class="price" ref="price"> {{item.unitPrice}}$</p>
-
-      </div>
-      <div v-else-if="item.isAvailable" class="cart-div">
-
-
-        <p :style="`color:${getStyle(item.rarity).color}`" class="price" ref="price"> {{item.unitPrice}}$</p>
+        <p :style="`color:${getStyle(item.rarity).color}`" class="price" ref="price"> {{item.lockedPrice}}$</p>
 
       </div>
+
 
     </div>
 
@@ -44,6 +39,9 @@ import {useRoute} from "vue-router";
 import gsap from "gsap";
 import {nextTick, onMounted, ref} from "vue";
 import {getItemBySlug} from "../../services/itemService";
+import {userStore} from "../../stores/userStore";
+import {getRarityName} from "../../utils/RarityMapper";
+import {addOrderItem} from "../../services/orderService";
 
 const route = useRoute();
 const price = ref(null);
@@ -51,24 +49,6 @@ const title = ref(null);
 const image = ref(null);
 const button = ref(null);
 const loading = ref(true);
-//const item = route.params.slug;
-//fake item
-/*
-const item = {
-
-  title: "Ceci est un vrai item",
-  description: "Ceci est vraiment un item, il sera disponible lors du lancement de l'application et permettra de savoir" +
-    "si des personnes sont mal intentionnées. Il sera indisponible à moins que des données soient manipulées. L'obtention de cet" +
-    "item déclenchera immédiatement une enquête concernant l'intégrité du compte. Si, par malchance, vous tombez sur cet item, veuillez au plus" +
-    "vite alerter un membre du support pour prouver votre intégrité et prévenir un bannissement.",
-  price: 30.56,
-  rarity: "unique",
-  image: "https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg"
-
-
-}
-
-*/
 const item = ref(null);
 
 const getStyle = (rarity) => {
@@ -86,7 +66,21 @@ onMounted(async () => {
 
   try {
 
-    item.value = await getItemBySlug(route.params.slug);
+    const res = await getItemBySlug(route.params.slug, userStore.id);
+
+    item.value = {
+
+      description: res.data.description,
+      id: res.data.id,
+      imageUrl: res.data.imageUrl,
+      lockedPrice: res.data.lockedPrice,
+      rarity: getRarityName(res.data.rarity),
+      name: res.data.name
+
+    }
+    if (res.data.lockedPrice) {
+      item.lockedPrice = res.data.lockedPrice;
+    }
 
 
   } finally {

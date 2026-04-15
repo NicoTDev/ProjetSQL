@@ -12,8 +12,15 @@ const BASIC_URL_ORDER = `${BASIC_URL}/orders`;
 
 export const getActiveOrderByUserId = async (userId)  => {
 
-    //const json = await getJson(`${BASIC_URL_ORDER}/${userId}`);
-    //console.log(json);
+    const json = await getJson(`${BASIC_URL_ORDER}/user/${userId}`);
+
+    return json;
+
+
+
+
+
+    /*
     return {
 
         orderId: "52562-f636f36-g43763732",
@@ -53,15 +60,21 @@ export const getActiveOrderByUserId = async (userId)  => {
 
     };
 
-}
-
-export const addOrderItem = (orderId)  => {
-
-    //
+     */
 
 }
 
-export const deleteOrderItem = (orderId) => {
+export const addOrderItem = async (userId, itemId)  => {
+
+    console.log("itemId ", itemId);
+    const res = await postJson(`${BASIC_URL_ORDER}`, {userId: userId, itemId: itemId});
+    console.log(res);
+
+}
+
+export const deleteOrderItem = async (userId, itemId) => {
+
+
 
 
 

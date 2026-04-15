@@ -15,7 +15,7 @@
     </h4>
 
     <button class="auth-button summonable-forms" @click="submitForms">
-      {{ isCreatingNewAccount ? "Login" : "Register" }}
+      {{ isCreatingNewAccount ? "Register" : "Login" }}
     </button>
 
     <p class="error-log"> {{errorMessage}}</p>
@@ -47,14 +47,24 @@ const submitForms = async () => {
 
     const values = registerRef.value.getValues();
 
+    if (values.password !== values.passwordConfirm) {
+
+      errorMessage.value = "Passwords do not match";
+      return;
+    }
+
     try {
       const res = await registerUser(values.username, values.lastName, values.firstName, values.email, values.password);
 
+      isCreatingNewAccount.value = false;
 
-        userStore.id = res.data.userId;
-        await router.push("/")
+    } catch (error) {
 
-    } catch (error) {}
+        errorMessage.value = JSON.parse(error.text).error;
+
+
+
+    }
 
   }
   else {
@@ -65,16 +75,20 @@ const submitForms = async () => {
     console.log(values);
 
     try {
+
       const res = await login(values.identifier, values.password);
 
-      console.log("status : " + res);
 
-        userStore.id = res.data.userId;
-        await router.push("/")
+      console.log(res);
+      userStore.id = res.id;
+      userStore.email = res.email;
+      userStore.username = res.username;
+      userStore.profileImage = res.profilImage;
+      await router.push("/")
 
     } catch(error) {
 
-      errorMessage.value = "Nom ou mot de passe invalide";
+      errorMessage.value = "Name or password invalid";
     }
 
   }
@@ -86,6 +100,7 @@ const submitForms = async () => {
 const switchForms = async () => {
 
   isCreatingNewAccount.value = !isCreatingNewAccount.value;
+  errorMessage.value = ""
 
   await nextTick();
 

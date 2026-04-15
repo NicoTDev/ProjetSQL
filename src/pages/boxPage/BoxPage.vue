@@ -36,7 +36,7 @@ import {getLatestActiveBoxByUserId, openBox} from "../../services/boxService";
 
 // Valeur initiale selon la date de la boite
 const box = ref(null);
-const state = ref(0);// 0=closed 1=isRevealing 2=open (Au yeux de la bd, isRevealing n'existe pas. Lors de l'ouverture, il passe directement à open avec generated content
+const state = ref(0);// 0=closed 1=open 2=isRevealing (Au yeux de la bd, isRevealing n'existe pas. Lors de l'ouverture, il passe directement à open avec generated content
 const isActive = computed(() => state.value === 0)
 const buttonVisible = ref(false);
 const counterText = ref("");
@@ -134,6 +134,7 @@ function formatTime(ms) {
 
 const showOpen = () => {
 
+
   startCounter();
   spawnBoxTimeTitle();
   createLegendaryText();
@@ -141,7 +142,6 @@ const showOpen = () => {
 
 }
 const showClose = () => {
-
   gsap.to(title.value, {
     opacity: 1,
     duration: 2,
@@ -154,14 +154,38 @@ const showClose = () => {
 }
 
 
-const reveal = () => {
+const reveal = async () => {
 
 
-  state.value = 2
+
 
   // Changer cet appel pour un appel API à open
-  userStore.nextBoxDate = new Date(Date.now() + 20 * 1000)
-  openBox(userStore.id);
+  let res
+  try {
+
+    res = await openBox(userStore.id);
+    box.value = {
+
+      boxId: res.boxId,
+      expires: res.expires,
+      items: res.items,
+
+    }
+    console.log(box.value)
+    userStore.nextBoxDate = new Date(box.value.expires)
+
+
+
+  } catch (err) {}
+  finally {
+
+    state.value = 2
+
+  }
+
+
+
+
 
 
   gsap.to(".button-container", {
@@ -230,15 +254,30 @@ const spawnBoxTimeTitle = () => {
 onMounted(async () => {
 
   try {
-    box.value = await getLatestActiveBoxByUserId(userStore.id);
 
-    await nextTick()
+    const res = await getLatestActiveBoxByUserId(userStore.id);
+    if (!res.canOpen) {
 
-    state.value = box.value.status === "active" ? 1 : 0;
+      box.value = {
+
+        boxId: res.boxId,
+        expires: res.expires,
+        items: res.items,
+
+      }
+      userStore.nextBoxDate = new Date(box.value.expires)
+      await nextTick()
+
+      state.value = 1;
+    }
+    else {
+
+      state.value = 0;
+    }
 
   }
   catch (err) {
-    state.value = 0;
+    console.log("Erreur inconnu (BoxPage)")
   }
 
   finally {
@@ -246,16 +285,11 @@ onMounted(async () => {
   }
 
 
-
-
-
   buttonVisible.value = state.value === 0;
 
   await nextTick()
 
-  state.value ? showOpen() : showClose();
-
-
+  state.value ? showOpen() : showClose() ;
 
 })
 

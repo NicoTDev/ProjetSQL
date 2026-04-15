@@ -7,10 +7,8 @@ const BASIC_URL_USER = `${BASIC_URL}/users`;
 export const registerUser = async (username, lastName, firstName, email, password) => {
 
 
-    let json
 
-    try {
-        json = await postJson(`${BASIC_URL_USER}/register`, {
+    const json = await postJson(`${BASIC_URL_USER}/register`, {
 
             username: username,
             lastName: lastName,
@@ -19,31 +17,7 @@ export const registerUser = async (username, lastName, firstName, email, passwor
             password: password,
 
         });
-
-    }
-    catch (err) {
-        if (err.status === 404) {
-
-            console.log("Aucun usager de connecté")
-
-        }
-        console.log(err)
-    }
-    return {
-
-        status: 201,
-        message: 'User registered',
-
-    }
-
-    /*
-    return {
-
-        status: 403,
-        message: 'Email is already registered',
-
-    }
-    */
+    return json;
 
 
 

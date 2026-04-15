@@ -5,7 +5,7 @@
 
     <h1 ref="title" class="page-title"> My cart </h1>
 
-    <div class="div-wrapper" ref="itemRef" v-for="item in order?.items" :key="item.orderItemId">
+    <div class="div-wrapper" ref="itemRef" v-for="item in order" :key="item.id">
       <OrderViewItem :item="item"></OrderViewItem>
     </div>
 
@@ -40,7 +40,7 @@ import {getActiveOrderByUserId} from "../../services/orderService";
 const order = ref(null);
 const title = ref(null);
 const itemRef = ref(null);
-const subtotal = computed(() => (order.value?.items ?? []).reduce((acc, item) => acc + Number(item.unitPrice || 0), 0));
+const subtotal = computed(() => (order.value?.items ?? []).reduce((acc, item) => acc + Number(Number(item.lockedPrice) || 0), 0));
 
 const buttonOrder = ref(null);
 
@@ -51,7 +51,8 @@ const buttonOrder = ref(null);
 onMounted(async () => {
 
 
-  order.value = await getActiveOrderByUserId(userStore.id);
+  const res = await getActiveOrderByUserId(userStore.id);
+  order.value = res.data
 
   await nextTick();
 

@@ -1,9 +1,10 @@
 <template>
-  <div class="content-container center-items" >
+  <h1 v-if="isLoading"></h1>
+  <div v-else class="content-container center-items" >
 
     <h1 class="page-title">Your inventory</h1>
 
-    <h2 class="subtitle"> {{ 'You have discovered ' +  discoveredItem.length + " item" + (discoveredItem.length > 1 ? 's' : '') + " on " + items.length }}</h2>
+    <h2 class="subtitle"> {{ 'You have discovered ' +  discoveredItems.length + " item" + (discoveredItems.length > 1 ? 's' : '') + " on " + items.length }}</h2>
 
     <div class="grid">
 
@@ -23,185 +24,46 @@
 
 import InventoryCard from "./components/InventoryCard.vue";
 import gsap from "gsap";
-import {onMounted} from "vue";
+import {nextTick, onMounted, ref} from "vue";
+import {getItemCollection} from "../../services/itemService";
+import {userStore} from "../../stores/userStore";
+
+const isLoading = ref(true);
+let items = ref([]);
+let boughtItems = ref([]);
+let discoveredItems = ref([]);
+
+onMounted(async () => {
 
 
-let broughtItems = [
+  try {
 
-  {
-    title:"Un item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 123,
-    rarety:"common",
+    const res = await getItemCollection(userStore.id);
+    discoveredItems.value = res.discover;
+    boughtItems.value = res.bought;
 
-  },
-  {
-    title:"Un deuxième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 188,
-    rarety:"uncommon",
+    items.value = [...boughtItems.value,...discoveredItems.value,...res.notDiscover];
 
-  },
-  {
-    title:"Un item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 1,
-    rarety:"rare",
 
-  },
-  {
-    title:"Un quatrième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 7737,
-    rarety:"legendary",
+  } catch(err) {}
+  finally {
 
-  },
-  {
-    title:"Un cinquième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 12345,
-    rarety:"unique",
+    isLoading.value = false;
 
-  }
-]
+    await nextTick();
 
-let discoveredItem = [
+    gsap.to(".card", {
 
-  {
-    title:"Un item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 123,
+      opacity: 1,
+      scale: 1,
+      duration:2,
+      stagger:0.1,
 
-  },
-  {
-    title:"Un troisième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 96,
-    rarety:"epic",
-
-  },
-]
-let items = [
-
-  {
-    title:"Un item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 123,
-    rarety:"common",
-
-  },
-  {
-    title:"Un deuxième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 188,
-    rarety:"uncommon",
-
-  },
-  {
-    title:"Un item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 1,
-    rarety:"rare",
-
-  },
-  {
-    title:"Un troisième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 96,
-    rarety:"epic",
-
-  },
-  {
-    title:"Un quatrième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 7737,
-    rarety:"legendary",
-
-  },
-  {
-    title:"Un cinquième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 12345,
-    rarety:"unique",
-
-  },
-  {
-    title:"Un item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 12300,
-    rarety:"common",
-
-  },
-  {
-    title:"Un deuxième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 18800,
-    rarety:"common",
-
-  },
-  {
-    title:"Corsair V32 Adventure edition Zephyr k23",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 100,
-    rarety:"common",
-
-  },
-  {
-    title:"Un troisième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 9600,
-    rarety:"common",
-
-  },
-  {
-    title:"Un quatrième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 773700,
-    rarety:"common",
-
-  },
-  {
-    title:"Un cinquième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 1234500,
-    rarety:"common",
-
-  },
-  {
-    title:"Un troisième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 91,
-    rarety:"common",
-
-  },
-  {
-    title:"Un quatrième item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-5.jpg",
-    id: 71,
-    rarety:"common",
-
-  },
-  {
-    title:"Le dernier item",
-    image:"https://res.cloudinary.com/dea0qybfa/image/upload/v1774585562/cld-sample-3.jpg",
-    id: 12345000,
-    rarety:"common",
+    })
 
   }
 
-]
 
-
-onMounted(() => {
-
-  gsap.to(".card", {
-
-    opacity: 1,
-    scale: 1,
-    duration:2,
-    stagger:0.1,
-
-  })
 
 
 
@@ -215,11 +77,11 @@ onMounted(() => {
 
 const getState = (item) => {
 
-  if (broughtItems.map((item) => {return item.id}).includes(item.id)) {
+  if (boughtItems.value.map((item) => {return item.id}).includes(item.id)) {
 
     return "brought"
   }
-  else if (discoveredItem.map((item) => {return item.id}).includes(item.id)) {
+  else if (discoveredItems.value.map((item) => {return item.id}).includes(item.id)) {
 
     return "discovered"
 

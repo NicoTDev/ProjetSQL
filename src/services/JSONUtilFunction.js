@@ -4,6 +4,7 @@ export const getJson = async (url) => {
         const text = await res.text();
 
         const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.text = text;
         error.status = res.status;
 
         throw error
@@ -25,6 +26,7 @@ export const postJson = async (url, body = {}) => {
         const text = await res.text()
 
         const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.text = text;
         error.status = res.status;
         throw error
     }
@@ -40,6 +42,7 @@ export const deleteJson = async (url = {}) => {
     if (!res.ok) {
         const text = await res.text()
         const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.text = text;
         error.status = res.status;
 
         throw error
@@ -58,6 +61,7 @@ export const putJson = async (url, body = {}) => {
     if (!res.ok) {
         const text = await res.text();
         const error = new Error(`HTTP error: ${res.status} - ${text}`);
+        error.text = text;
         error.status = res.status;
 
         throw error

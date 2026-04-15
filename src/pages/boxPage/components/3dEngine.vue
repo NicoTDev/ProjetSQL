@@ -10,6 +10,7 @@ import gsap from "gsap"
 import {BoxModel} from "./BoxModel"
 import {CardModel} from "./CardModel"
 import { useRouter } from "vue-router"
+import {getRarityName} from "@/utils/RarityMapper.js";
 const state = defineModel("state")
 
 const bg = ref(null)
@@ -79,15 +80,16 @@ const showOpen = () => {
 const summonCards = () => {
 
 
+
   for (let card of props.box.items.sort((a, b) => a.slotIndex - b.slotIndex)) {
 
     const canvas = document.createElement("canvas")
     const localCard = new CardModel(
       canvas,
       card.name,
-      card.rarity,
+      getRarityName(card.rarity),
       card.imageUrl,
-      card.unitPrice
+      card.lockedPrice
     ).getModel()
 
     localCard.userData = {
@@ -142,12 +144,11 @@ const reset = () => {
   destroyCards()
   setTimeout(() => box.close(), 3000)
 
-  console.log("reset")
+
 }
 
 const reveal = () => {
   box.open()
-  console.log("reveal")
 
   gsap.to(boxCamera.position, {
     x: 2.5,
@@ -185,9 +186,7 @@ const reveal = () => {
   }
 }
 
-const finishOpening = () => {
-  console.log("finishOpening")
-}
+const finishOpening = () => {}
 
 const onCanvasClick = (event) => {
   if (!renderer || !uiCamera || cards.length === 0 || state.value !== 1) return
@@ -303,8 +302,6 @@ onMounted(() => {
 
   boxScene.add(box.getChest())
 
-  console.log(state.value)
-
   state.value ? showOpen() : showClosed()
 
   window.addEventListener("resize", resize)
@@ -362,7 +359,6 @@ onUnmounted(() => {
 watch(
   () => state.value,
   (newValue) => {
-    console.log("Watching", newValue)
 
     switch (newValue) {
       case 0:

@@ -19,7 +19,7 @@
     </div>
 
     <!-- email  -->
-    <EmailInputBox v-model="isDirty"></EmailInputBox>
+    <EmailInputBox ref="emailInput" v-model="isDirty"></EmailInputBox>
 
 
     <button @click="sendChangeData" class="change-button">Save changes</button>
@@ -37,6 +37,7 @@ import EmailInputBox from "./components/EmailInputBox.vue";
 
 const userNameInput = ref(userStore.username || "Nom par défaut");
 const isDirty = ref(false);
+const emailInput = ref(null);
 
 watch(isDirty, (newValue) => {
 
@@ -77,6 +78,9 @@ const handleUsernameChange = async () => {
 
 const sendChangeData = () => {
   isDirty.value = false;
+  userStore.username = userNameInput.value;
+  userStore.email = emailInput.getValue();
+
 };
 
 

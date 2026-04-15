@@ -33,6 +33,12 @@ const emailIni = ref("")
 const emailSent = ref(false)
 const verifyButtonText = ref("Verify your email")
 
+defineExpose({
+
+  getValue: () => emailInput.value
+
+})
+
 
 const verifyEmail =  () => {
 
@@ -57,8 +63,6 @@ const resetEmail = () => {
   isDirty.value = true;
   userStore.hasEmailVerified = false;
   emailIni.value = emailInput.value;
-  console.log(userStore.hasEmailVerified);
-
 
 }
 

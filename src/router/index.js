@@ -5,7 +5,6 @@ import InventoryPage from "../pages/inventory/InventoryPage.vue";
 import AuthPage from "../pages/auth/AuthPage.vue";
 import ItemViewPage from "../pages/itemViewPage/ItemViewPage.vue";
 import AccountPage from "../pages/account/AccountPage.vue";
-import ProfilePage from "../pages/Profile/ProfilePage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,11 +28,6 @@ const router = createRouter({
             path: '/inventory',
             name: 'Inventory Page',
             component: InventoryPage,
-        },
-        {
-            path: '/profile',
-            name: 'Profile Page',
-            component: ProfilePage,
         },
         {
             path: '/account',

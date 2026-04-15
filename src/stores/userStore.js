@@ -7,6 +7,7 @@ export const userStore = reactive({
     profileImage:null,
     email: "Nicotrem2004@hotmail.com",
     expires: new Date(2011, 1, 1),
+    hasEmailVerified: true,
 
 
 })
